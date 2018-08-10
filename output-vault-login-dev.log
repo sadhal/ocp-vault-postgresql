@@ -1,0 +1,18 @@
+[sadhal@localhost ocp-vault-postgresql]$ vault login -method=userpass username=sadhal
+Password (will be hidden): 
+Success! You are now authenticated. The token information displayed below
+is already stored in the token helper. You do NOT need to run "vault login"
+again. Future Vault requests will automatically use this token.
+
+Key                    Value
+---                    -----
+token                  e9913547-205e-c9a8-389f-3d1ba7de4522
+token_accessor         5ae893e8-7f9c-e355-522b-f72e074b6c4b
+token_duration         1h
+token_renewable        true
+token_policies         ["default" "mydb1-human"]
+identity_policies      []
+policies               ["default" "mydb1-human"]
+token_meta_username    sadhal
+[sadhal@localhost ocp-vault-postgresql]$ 
+

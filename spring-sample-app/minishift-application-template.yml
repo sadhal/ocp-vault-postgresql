@@ -1,0 +1,226 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: skv-java-app
+
+parameters:
+- name: APP_NAME
+  description: Name of the build
+  required: true
+  displayName: Application Name
+  value: java-template-app
+
+
+objects:
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}-binary
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${APP_NAME}:latest"
+    postCommit: {}
+    resources:
+      limits:
+        memory: 1Gi
+        cpu: 750m
+    runPolicy: Serial
+    source:
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          # kind: ImageStreamTag
+          kind: DockerImage
+          # name: 'redhat-openjdk18-openshift:1.3'
+          # name: 'wildfly:latest'
+          name: 'registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:latest'
+          # namespace: openshift
+      type: Source
+    triggers: []
+
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec: {}
+  status:
+  dockerImageRepository: ""
+
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    replicas: 1
+    selector:
+      app: ${APP_NAME}
+      deploymentconfig: ${APP_NAME}
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${APP_NAME}
+          deploymentconfig: ${APP_NAME}
+      spec:
+        initContainers:
+        - image: registry.access.redhat.com/redhat-sso-7/sso71-openshift:1.1-16
+          name: pem-to-truststore
+          env:
+            - name: ca_bundle
+              value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+            - name: truststore_jks
+              value: /var/run/secrets/java.io/keystores/truststore.jks
+            - name: password
+              value: changeit    
+          command: ['/bin/bash']
+          args: ['-c', "csplit -z -f crt- $ca_bundle '/-----BEGIN CERTIFICATE-----/' '{*}' && for file in crt-*; do keytool -import -noprompt -keystore $truststore_jks -file $file -storepass changeit -alias service-$file; done"]
+          volumeMounts:
+            - name: keystore-volume
+              mountPath: /var/run/secrets/java.io/keystores 
+        containers:
+        - image: ${APP_NAME}:latest
+          imagePullPolicy: IfNotPresent
+          name: ${APP_NAME}
+          env:
+          - name: APP_NAME
+            value: ${APP_NAME}
+          - name: JAVA_OPTS
+            value: -Xmx512m -Djavax.net.ssl.trustStore=/var/run/secrets/java.io/keystores/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit
+          - name: JAVA_OPTIONS
+            value: -Xmx512m -Djavax.net.ssl.trustStore=/var/run/secrets/java.io/keystores/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit
+          - name: "VAULT_HOST"
+            value: "vault.secret-management.svc"
+          - name: "VAULT_PORT"
+            value: "8200"           
+          - name: SPRING_DATASOURCE_URL
+            value: "jdbc:postgresql://${APP_NAME}.db-postgresql.svc/backend"
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - name: keystore-volume
+            mountPath: /var/run/secrets/java.io/keystores
+          # livenessProbe:
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: 8080
+          #     scheme: HTTP
+          #   initialDelaySeconds: 10
+          #   timeoutSeconds: 2
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   failureThreshold: 3
+          # readinessProbe:
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: 8080
+          #     scheme: HTTP
+          #   initialDelaySeconds: 10
+          #   timeoutSeconds: 2
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   failureThreshold: 3
+          resources:
+            limits:
+              cpu: 750m
+              memory: 750Mi
+#        - image: docker-registry.default.svc:5000/g2-cicd-utv/jaeger-agent
+#          imagePullPolicy: IfNotPresent
+#          name: jaeger-agent-instance
+#          command:
+#          - "/go/bin/agent-linux"
+#          - "--collector.host-port=jaeger-collector-appinfra-gemensam-monitorering-sys.tt.test.ocp.rsv.se"
+#          ports:
+#          - containerPort: 5775
+#            protocol: UDP
+#          - containerPort: 6831
+#            protocol: UDP
+#          - containerPort: 6832
+#            protocol: UDP
+        volumes:
+        - name: keystore-volume
+          emptyDir: {}
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APP_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APP_NAME}:latest
+      type: ImageChange
+  status: {}
+
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      prometheus.io/scrape: "true"
+      prometheus.io/scheme: http
+      prometheus.io/port: "8080"
+      prometheus.io/path: /actuator/prometheus
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8083-tcp
+      port: 8083
+      protocol: TCP
+      targetPort: 8083
+    selector:
+      app: ${APP_NAME}
+      deploymentconfig: ${APP_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${APP_NAME}
+    labels:
+      app: ${APP_NAME}
+  spec:
+    to:
+      kind: Service
+      name: ${APP_NAME}
+      weight: 100
+    port:
+      targetPort: 8080-tcp
+    wildcardPolicy: None

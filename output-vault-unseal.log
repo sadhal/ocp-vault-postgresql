@@ -1,0 +1,13 @@
+[sadhal@localhost ocp-vault-postgresql]$ vault operator unseal $KEYS
+Key             Value
+---             -----
+Seal Type       shamir
+Sealed          false
+Total Shares    1
+Threshold       1
+Version         0.10.4
+Cluster Name    vault-cluster-eb46ffe4
+Cluster ID      fdc87dd4-2660-1be2-b3fa-5657ae5c0ad7
+HA Enabled      false
+[sadhal@localhost ocp-vault-postgresql]$ 
+

@@ -1,0 +1,17 @@
+[sadhal@localhost ocp-vault-postgresql]$ vault operator init -key-shares=1 -key-threshold=1
+Unseal Key 1: d1xNGblO/yubtXa0tywxQvRVBgwqcm40mQ9MubjRWn0=
+
+Initial Root Token: 1ad5a53a-7f0e-7128-1ef6-a5ac7ba4abfc
+
+Vault initialized with 1 key shares and a key threshold of 1. Please securely
+distribute the key shares printed above. When the Vault is re-sealed,
+restarted, or stopped, you must supply at least 1 of these keys to unseal it
+before it can start servicing requests.
+
+Vault does not store the generated master key. Without at least 1 key to
+reconstruct the master key, Vault will remain permanently sealed!
+
+It is possible to generate new unseal keys, provided you have a quorum of
+existing unseal keys shares. See "vault operator rekey" for more information.
+[sadhal@localhost ocp-vault-postgresql]$ export KEYS=d1xNGblO/yubtXa0tywxQvRVBgwqcm40mQ9MubjRWn0=
+[sadhal@localhost ocp-vault-postgresql]$ export ROOT_TOKEN=1ad5a53a-7f0e-7128-1ef6-a5ac7ba4abfc

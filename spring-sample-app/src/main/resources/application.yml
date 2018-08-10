@@ -1,0 +1,58 @@
+# spring.data.rest.base-path=/
+#server.port=8080
+#endpoints.health.enabled=true
+# management.endpoints.web.exposure.include=health,info,env,refresh
+#management.endpoints.web.exposure.include=health,info
+# management.endpoint.health.show-details=true
+
+# spring.datasource.url=jdbc:postgresql://localhost/backend
+# spring.datasource.driver-class-name=org.postgresql.Driver
+# spring.jpa.hibernate.ddl-auto=create
+# spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+# spring.jpa.show-sql=true
+# spring.jpa.database=postgresql
+# spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
+
+
+# Spring Boot configuration
+spring:
+  profiles:
+    active: development
+# Database
+  datasource:
+    driver-class-name: org.postgresql.Driver
+# JPA properties
+  jpa:
+    hibernate:
+    #   ddl-auto: none
+      ddl-auto: create
+    show-sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    generate-ddl: false
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false 
+    
+# Logger configuration
+logging:
+  pattern:
+    console: "%d %-5level %logger : %msg%n"
+  level:
+    org.springframework: INFO
+    org.springframework.vault: DEBUG
+    org.hibernate: INFO
+# Server configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["health", "info"] #, "refresh", "env"]
+  endpoint:
+    health:
+      show-details: when-authorized
+server:
+  port: 8080
+  sessionTimeout: 30
