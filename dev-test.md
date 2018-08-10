@@ -42,7 +42,11 @@ password           A1a-1rUzLBdhNjl7lU9R
 username           v-userpass-mydb1-kxkqS8D8VULlLTrI9J3L-1533906891
 ```
 
-## Connect to postgresql using your client|cli
+## Connect to postgresql
+### CLI
+CLI how-to available at: https://blog.openshift.com/openshift-connecting-database-using-port-forwarding/
+
+### Sequeler (client for linux)
 ![sequeler-new-connection](/assets/sequeler-new-connection.png)
 <!-- pagebreak -->
 
