@@ -1,4 +1,6 @@
-{"backend": 
+{
+	"ui": true,
+	"backend": 
 	{"file": 
 		{"path": "/vault/file"}
 	}, 
