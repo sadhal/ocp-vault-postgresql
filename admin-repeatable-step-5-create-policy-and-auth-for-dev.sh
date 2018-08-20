@@ -12,7 +12,7 @@ export VAULT_SKIP_VERIFY=true
         vault/${DATABASE_NAME}-human.hcl
 
     vault write auth/userpass/users/${USER} \
-        password="s3cr3t!" \
+        password="hemligt" \
         policies="${DATABASE_NAME}-human" \
         ttl=1h
 }

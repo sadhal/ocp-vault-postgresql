@@ -14,10 +14,12 @@ function run_k8s_auth_test {
 }
 
 function run_spring_app_test {
+    oc login -u developer -p developer
+    oc project ${OCP_NAMESPACE}
     echo "Test spring application and it's integration with Vault"
     echo ""
     # Test service
-    route=$(oc get route ${APPLICATION_NAME} -n ${OCP_NAMESPACE} -o jsonpath={.spec.host})
+    route=$(oc get route ${APPLICATION_NAME} -o jsonpath={.spec.host})
 
     curl http://$route/actuator/health 
     echo ""

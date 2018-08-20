@@ -9,7 +9,9 @@
 	* [Enable port-forward on minishift](#enable-port-forward-on-minishift)
 	* [Login to Vault](#login-to-vault)
 	* [Generate credentials for postgresql](#generate-credentials-for-postgresql)
-	* [Connect to postgresql using your client|cli](#connect-to-postgresql-using-your-clientcli)
+	* [Connect to postgresql](#connect-to-postgresql)
+		* [CLI](#cli)
+		* [Sequeler (client for linux)](#sequeler-client-for-linux)
 
 <!-- /code_chunk_output -->
 

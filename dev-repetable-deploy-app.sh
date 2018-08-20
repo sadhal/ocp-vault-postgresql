@@ -9,8 +9,8 @@ OCP_NAMESPACE=$2
 function create_ocp_app {
     
     echo "Create new OCP project and asign developer as project admin..."
-    # oc login -u admin -p admin
-    # oc adm new-project ${OCP_NAMESPACE} --admin=developer
+    oc login -u admin -p admin
+    oc adm new-project ${OCP_NAMESPACE} --admin=developer
 
     echo "Deploy sample application as developer..."
     oc login -u developer -p developer
